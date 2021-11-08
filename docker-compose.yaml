@@ -1,0 +1,51 @@
+version: '3'
+services:
+  database:
+    image: postgres:13
+    volumes:
+      - psql_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST=localhost
+      - POSTGRES_DB=movies
+    restart: always
+    networks:
+      - app-network
+
+  movies-admin:
+    depends_on:
+      - database
+    build: .
+    volumes:
+      - static:/home/movies/static
+    env_file:
+      - .env
+    #ports:
+    #  - '8000:8000'
+    networks:
+      - app-network
+
+  server:
+    image: nginx:1.20
+    depends_on:
+      - movies-admin
+    volumes:
+      - ./src/nginx.conf:/etc/nginx/nginx.conf
+      - ./src/conf:/etc/nginx/conf.d
+      - static:/var/www/static
+    ports:
+      - "80:80"
+    restart: on-failure
+    networks:
+      - app-network
+
+volumes:
+  static:
+  psql_data:
+
+networks:
+    app-network:
+        driver: bridge
+
+
