@@ -15,7 +15,7 @@ class TimeStampedModel(models.Model):
 class Genre(TimeStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(_('Title'), max_length=25)
-    description = models.TextField(_('Description'), blank=True)
+    description = models.TextField(_('Description'), blank=True, null=True)
 
     class Meta:
         verbose_name = _('Genre')
@@ -29,7 +29,7 @@ class Genre(TimeStampedModel):
 class Person(TimeStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     full_name = models.CharField(_('Full name'), max_length=128)
-    birth_date = models.DateField(_('Birth date'), blank=True)
+    birth_date = models.DateField(_('Birth date'), blank=True, null=True)
 
     class Meta:
         verbose_name = _('Person')
@@ -54,15 +54,16 @@ class PersonRoleType(models.TextChoices):
 class FilmWork(TimeStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(_('Title'), max_length=128)
-    description = models.TextField(_('Description'), blank=True)
-    creation_date = models.DateField(_('Creation date'), blank=True)
-    certificate = models.TextField(_('Certificate'), blank=True)
-    file_path = models.FileField(_('File'), upload_to='film_works/', blank=True)
+    description = models.TextField(_('Description'), blank=True, null=True)
+    creation_date = models.DateField(_('Creation date'), blank=True, null=True)
+    certificate = models.TextField(_('Certificate'), blank=True, null=True)
+    file_path = models.FileField(_('File'), upload_to='film_works/', blank=True, null=True)
     rating = models.FloatField(
         _('Rating'),
         validators=[MinValueValidator(0), MaxValueValidator(10)],
         default=0.0,
-        blank=True
+        blank=True,
+        null=True,
     )
     type = models.CharField(_('Type'), max_length=20, choices=FilmWorkType.choices)
     genres = models.ManyToManyField(Genre, through='FilmWorkGenre')
@@ -86,7 +87,7 @@ class FilmWorkGenre(models.Model):
     class Meta:
         db_table = 'content\".\"genre_film_work'
         indexes = [
-            models.Index(fields=['film_work_id', 'genre_id'], name='genre_film_work'),
+            models.Index(fields=['film_work_id', 'genre_id'], name='id_genre_film_work_index'),
         ]
         verbose_name = "Genres of film"
         verbose_name_plural = _('Genres of film')
@@ -106,7 +107,7 @@ class FilmWorkPerson(models.Model):
     class Meta:
         db_table = 'content\".\"person_film_work'
         indexes = [
-            models.Index(fields=['film_work_id', 'person_id', 'role'], name='person_film_work'),
+            models.Index(fields=['film_work_id', 'person_id', 'role'], name='id_person_role_index'),
         ]
         unique_together = ('film_work_id', 'person_id', 'role', )
         verbose_name = "Persons of film"
