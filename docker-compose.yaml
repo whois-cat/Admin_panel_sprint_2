@@ -4,7 +4,7 @@ services:
     image: postgres:13
     volumes:
       - ./data:/var/lib/postgresql/data
-      - ./db/postgres_schema.sql:/docker-entrypoint-initdb.d/postgres_schema.sql
+      - ./db/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
