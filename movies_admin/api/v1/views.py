@@ -21,21 +21,19 @@ class MoviesApiMixin:
 
     @classmethod
     def get_queryset(cls):
-        return FilmWork.objects.values(
-            "id", "title", "description", "creation_date", "rating", "type"
-        ).annotate(
-            genres=ArrayAgg("genres__name", distinct=True),
+        return FilmWork.objects.select_related('persons', 'film_genres').annotate(
+            genres=ArrayAgg("film_genres__name", distinct=True),
             actors=cls._aggregate_person(role=PersonRoleType.ACTOR),
             directors=cls._aggregate_person(role=PersonRoleType.DIRECTOR),
             writers=cls._aggregate_person(role=PersonRoleType.WRITER),
-        )
+        ).values()
 
     @staticmethod
     def render_to_response(context, **response_kwargs):
         return JsonResponse(context)
 
 
-class Movies(MoviesApiMixin, BaseListView):
+class MoviesListApi(MoviesApiMixin, BaseListView):
     paginate_by = 50
     ordering = "title"
 
@@ -54,11 +52,5 @@ class Movies(MoviesApiMixin, BaseListView):
 
 
 class MoviesDetailApi(MoviesApiMixin, BaseDetailView):
-    def get_object(self, queryset=None):
-        try:
-            return self.get_queryset().filter(id=self.kwargs["pk"]).get()
-        except FilmWork.DoesNotExist as err:
-            return None
-
     def get_context_data(self, object, **kwargs):
         return object

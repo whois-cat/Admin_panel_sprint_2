@@ -66,7 +66,7 @@ class FilmWork(TimeStampedModel):
         null=True,
     )
     type = models.CharField(_('Type'), max_length=20, choices=FilmWorkType.choices)
-    genres = models.ManyToManyField(Genre, through='FilmWorkGenre')
+    film_genres = models.ManyToManyField(Genre, through='FilmWorkGenre')
     persons = models.ManyToManyField(Person, through='FilmWorkPerson')
 
     class Meta:
